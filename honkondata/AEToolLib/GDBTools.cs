@@ -41,7 +41,14 @@ namespace AEToolLib
             {
               GetGDBWsf();
               this.gdbFilePath = gdbFilePath;
-              ws = wsf.OpenFromFile(gdbFilePath, hWnd);
+              try
+              {
+
+                 ws = wsf.OpenFromFile(gdbFilePath, hWnd);
+              } catch(Exception)
+              {
+                  return null;
+              }
             }
             return ws;
         }
@@ -59,6 +66,8 @@ namespace AEToolLib
         {
             ArrayList features = new ArrayList();
             IWorkspace fws = GetWorkspace(gdbFilePath);
+            if (fws == null)
+                return null;
             IEnumDataset datasets = fws.get_Datasets(esriDatasetType.esriDTFeatureDataset);
             IDataset dataset = datasets.Next();
 
@@ -103,7 +112,7 @@ namespace AEToolLib
         /// <param name="originFeature">源要素</param>
         /// <param name="hlevel">h级别</param>
         /// <param name="buffer">缓冲区范围</param>
-        private void UpdateFeature(String targetFeature,String originFeature, String hlevel,double buffer)
+        public void UpdateFeature(String targetFeature,String originFeature, String hlevel,double buffer)
         {
             InitWorkspace();
             IFeatureWorkspace fws = (IFeatureWorkspace)ws;
@@ -142,7 +151,7 @@ namespace AEToolLib
         /// <param name="point">目标点</param>
         /// <param name="HLevel">HLevel</param>
         /// <param name="buffer">缓冲范围</param>
-        private void setPointZ(IFeatureWorkspace fws, String originFeature, IPoint targetPoint, String HLevel,double buffer)
+        public void setPointZ(IFeatureWorkspace fws, String originFeature, IPoint targetPoint, String HLevel,double buffer)
         {
 
             //根据点坐标找到指定距离内的三维点云数据
@@ -168,5 +177,10 @@ namespace AEToolLib
 
         }
 
+        public IWorkspace GetWorkspace()
+        {
+            InitWorkspace();
+            return ws;
+        }
     }
 }

@@ -29,7 +29,6 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(HKDataProcessForm));
-            this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.label1 = new System.Windows.Forms.Label();
             this.gdbFileTxt = new System.Windows.Forms.TextBox();
             this.targerFeatures = new System.Windows.Forms.CheckedListBox();
@@ -43,6 +42,8 @@
             this.label6 = new System.Windows.Forms.Label();
             this.buffer = new System.Windows.Forms.TextBox();
             this.processResult = new System.Windows.Forms.Label();
+            this.updateProcessPercent = new System.Windows.Forms.ProgressBar();
+            this.details = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // label1
@@ -161,11 +162,29 @@
             this.processResult.Size = new System.Drawing.Size(0, 21);
             this.processResult.TabIndex = 12;
             // 
+            // updateProcessPercent
+            // 
+            this.updateProcessPercent.Location = new System.Drawing.Point(17, 456);
+            this.updateProcessPercent.Name = "updateProcessPercent";
+            this.updateProcessPercent.Size = new System.Drawing.Size(500, 23);
+            this.updateProcessPercent.TabIndex = 13;
+            // 
+            // details
+            // 
+            this.details.AutoSize = true;
+            this.details.Font = new System.Drawing.Font("微软雅黑", 9F);
+            this.details.Location = new System.Drawing.Point(15, 538);
+            this.details.Name = "details";
+            this.details.Size = new System.Drawing.Size(0, 17);
+            this.details.TabIndex = 14;
+            // 
             // HKDataProcessForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(534, 573);
+            this.Controls.Add(this.details);
+            this.Controls.Add(this.updateProcessPercent);
             this.Controls.Add(this.processResult);
             this.Controls.Add(this.buffer);
             this.Controls.Add(this.label6);
@@ -189,7 +208,6 @@
 
         #endregion
 
-        private System.ComponentModel.BackgroundWorker backgroundWorker1;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox gdbFileTxt;
         private System.Windows.Forms.CheckedListBox targerFeatures;
@@ -203,6 +221,8 @@
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.TextBox buffer;
         private System.Windows.Forms.Label processResult;
+        private System.Windows.Forms.ProgressBar updateProcessPercent;
+        private System.Windows.Forms.Label details;
     }
 }
 
