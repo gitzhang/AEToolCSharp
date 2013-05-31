@@ -13,6 +13,7 @@ using ESRI.ArcGIS.DataSourcesGDB;
 using ESRI.ArcGIS.Geodatabase;
 using ESRI.ArcGIS.Geometry;
 using ESRI.ArcGIS.esriSystem;
+using ESRI.ArcGIS.Carto;
 
 namespace GDBProcessWin
 {
@@ -59,20 +60,20 @@ namespace GDBProcessWin
             {
                 gdbFilePath = folder.SelectedPath;
                 gdbFileTxt.Text = gdbFilePath;
-                FillFeaturesToBox();
+                FillFeaturesToBox(targerFeatures);
             }
         }
 
         /// <summary>
         /// 填充要素到CheckedListBox
         /// </summary>
-        private void FillFeaturesToBox()
+        private void FillFeaturesToBox(CheckedListBox clb)
         {
             ArrayList features = gdbTool.GetFeatures(gdbFilePath);
             if (features != null)
             {
-                targerFeatures.Items.Clear();
-                targerFeatures.Items.AddRange(features.ToArray());
+                clb.Items.Clear();
+                clb.Items.AddRange(features.ToArray());
                 processResult.Text = "";
             }
             else
@@ -230,7 +231,35 @@ namespace GDBProcessWin
                 polygon = cursor.NextFeature();
             }
         }
-      
+
+
+        private void RSFilePath_MouseClick(object sender, MouseEventArgs e)
+        {
+            FolderBrowserDialog folder = new FolderBrowserDialog();
+            folder.Description = "请选择GDB文件路径.";
+            if (folder.ShowDialog() == DialogResult.OK)
+            {
+                gdbFilePath = folder.SelectedPath;
+                RSFilePath.Text = gdbFilePath;
+                FillFeaturesToBox(RSFeatures);
+            }
+        }
+
+        /// <summary>
+        /// 接边检查程序  启动按钮
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void button1_Click(object sender, EventArgs e)
+        {
+            IFeatureWorkspace ws = (IFeatureWorkspace)gdbTool.GetWorkspace();
+            IEnumerator erator = RSFeatures.CheckedItems.GetEnumerator();
+            while (erator.MoveNext())
+            {
+ 
+
+            }
+        }
     }
 }
 

@@ -30,6 +30,7 @@ namespace GDBProcessWin
             ESRI.ArcGIS.RuntimeManager.Bind(ESRI.ArcGIS.ProductCode.EngineOrDesktop);
             AoInitialize ao = new AoInitialize();
             ao.Initialize(esriLicenseProductCode.esriLicenseProductCodeEngineGeoDB);
+
         }
     }
 }
