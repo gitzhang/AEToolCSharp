@@ -23,9 +23,13 @@ namespace GDBProcessWin
         public delegate void DoneFeatureProcess(string info);//实现Background的RunWorkerCompleted事件
         public delegate void FeatureProcessDetail(string info); //实现要素处理的细节信息
 
+        public delegate void StartRoadCheck();//开始进行接边检查
+
         ReportProcessInfo reportProcessInfo;
         DoneFeatureProcess doneFeatureProcess;
         FeatureProcessDetail featureProcessDetail;
+
+        StartRoadCheck startRoadCheck;
 
         /// <summary>
         /// gdb文件路径
@@ -43,6 +47,7 @@ namespace GDBProcessWin
             reportProcessInfo = new ReportProcessInfo(UpdatePercentInfo);
             doneFeatureProcess = new DoneFeatureProcess(UpdateFeatureComplete);
             featureProcessDetail = new FeatureProcessDetail(UpdateFeatureDetail);
+            startRoadCheck = new StartRoadCheck(startRoadCheckMethod);
             gdbTool = new GDBTools();
         }
 
@@ -252,13 +257,35 @@ namespace GDBProcessWin
         /// <param name="e"></param>
         private void button1_Click(object sender, EventArgs e)
         {
-            IFeatureWorkspace ws = (IFeatureWorkspace)gdbTool.GetWorkspace();
-            IEnumerator erator = RSFeatures.CheckedItems.GetEnumerator();
-            while (erator.MoveNext())
-            {
- 
+            button1.Enabled = false;
+            Thread process = new Thread(new ThreadStart(this.RoadCheckProcessStart));
+            process.Start();
+        }
 
+        /// <summary>
+        /// 接边进程开始
+        /// </summary>
+        private void RoadCheckProcessStart()
+        {
+            startRoadCheckMethod();
+        }
+
+        /// <summary>
+        /// 代理接边检查方法
+        /// </summary>
+        private void startRoadCheckMethod()
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new StartRoadCheck(startRoadCheckMethod));
             }
+            else
+            {
+                IEnumerator erator = RSFeatures.CheckedItems.GetEnumerator();
+                ArrayList featureArray = Utils.ConvertEnumerlatorToArrayList(erator); //需要接边的图层名称列表
+                gdbTool.JiebianProcess(featureArray);
+            }
+
         }
     }
 }

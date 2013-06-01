@@ -16,6 +16,8 @@ namespace AEToolLib
 
         private IWorkspace ws;
 
+        private IFeatureWorkspace fws;
+
         private String gdbFilePath;
 
         private int hWnd = 0;
@@ -46,6 +48,7 @@ namespace AEToolLib
               {
 
                  ws = wsf.OpenFromFile(gdbFilePath, hWnd);
+                 fws = (IFeatureWorkspace)ws;
               } catch(Exception)
               {
                   return null;
@@ -176,6 +179,59 @@ namespace AEToolLib
                 targetPoint.Z = point.Z;
             }
 
+        }
+
+        public void JiebianProcess(ArrayList featureArray)
+        {
+            InitWorkspace();
+            if(featureArray == null || featureArray.Count == 0)
+            {
+                return ;
+            }
+            foreach (String featureName in featureArray) //循环接边
+            {
+                //接边流程
+
+                //1 取出一个面
+                IFeatureClass featureClass = fws.OpenFeatureClass(featureName);
+
+                //2 查询出所有的要素(可更新要素)
+                IFeatureCursor updateCursor = featureClass.Update(null, true);
+
+                //3 循环接边
+                //3.1 取出一个面
+                IFeature updateFeature = updateCursor.NextFeature();
+
+                //3.2 取出这个面的所有点
+                Polygon updatePolygon = (Polygon)updateFeature.Shape;
+                int pointCount = updatePolygon.PointCount - 1; //多边形最后一个点与第一个点重复，不编辑
+
+                for (int i = 0; i < pointCount; i++)
+                {
+                    ESRI.ArcGIS.Geometry.Point point = (Point)updatePolygon.get_Point(i);
+
+                    //3.3 判断与点接触的面,条件这个面不是自己
+                    ISpatialFilter spatiaFilter = new SpatialFilter();
+                    spatiaFilter.GeometryField = "shape";
+                    spatiaFilter.SpatialRel = esriSpatialRelEnum.esriSpatialRelTouches;
+                    spatiaFilter.Geometry = updatePolygon.get_Point(i);
+                    
+                    //3.4 根据条件循环查询
+                    foreach (string otherFeatureName in featureArray)
+                    {
+                        if (featureName.Equals(otherFeatureName))
+                        {
+                            spatiaFilter.WhereClause = "OBJECTID <> " + updateFeature.OID;
+                        }
+
+                        IFeatureClass otherFeature = fws.OpenFeatureClass(otherFeatureName);
+                        IFeatureCursor cursor = otherFeature.Update(spatiaFilter,true);
+                        IFeature feature = cursor.NextFeature();// 查询到的接触点
+                        int id = feature.OID;
+                    }
+                }
+
+            }
         }
 
         public IWorkspace GetWorkspace()
