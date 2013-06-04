@@ -42,17 +42,17 @@ namespace AEToolLib
         {
             if (ws == null)
             {
-              GetGDBWsf();
-              this.gdbFilePath = gdbFilePath;
-              try
-              {
-
-                 ws = wsf.OpenFromFile(gdbFilePath, hWnd);
-                 fws = (IFeatureWorkspace)ws;
-              } catch(Exception)
-              {
-                  return null;
-              }
+                GetGDBWsf();
+                this.gdbFilePath = gdbFilePath;
+                try
+                {
+                    ws = wsf.OpenFromFile(gdbFilePath, hWnd);
+                    fws = (IFeatureWorkspace)ws;
+                }
+                catch (Exception)
+                {
+                    return null;
+                }
             }
             return ws;
         }
@@ -96,14 +96,14 @@ namespace AEToolLib
         /// <param name="originFeature"></param>
         /// <param name="HLevel"></param>
         /// <param name="buffer"></param>
-        public void UpdateFeatures(IEnumerator targetFeatures,String originFeature,String[] HLevel,double buffer)
+        public void UpdateFeatures(IEnumerator targetFeatures, String originFeature, String[] HLevel, double buffer)
         {
             while (targetFeatures.MoveNext())
             {
                 String featureName = (String)targetFeatures.Current;
-                for (int i = 0, length = HLevel.Length;i < length ; i++)
+                for (int i = 0, length = HLevel.Length; i < length; i++)
                 {
-                    UpdateFeature(featureName, originFeature,HLevel[i],buffer);
+                    UpdateFeature(featureName, originFeature, HLevel[i], buffer, null);
                 }
             }
         }
@@ -116,11 +116,12 @@ namespace AEToolLib
         /// <param name="originFeature">源要素</param>
         /// <param name="hlevel">h级别</param>
         /// <param name="buffer">缓冲区范围</param>
-        public void UpdateFeature(String targetFeature,String originFeature, String hlevel,double buffer)
+        public void UpdateFeature(String targetFeature, String originFeature, String hlevel, double buffer, Delegate delegateMethod)
         {
             InitWorkspace();
             IFeatureWorkspace fws = (IFeatureWorkspace)ws;
             IFeatureClass features = fws.OpenFeatureClass(targetFeature);
+            IFeatureClass origin = fws.OpenFeatureClass(originFeature);
             IQueryFilter filter = new QueryFilter();
             filter.WhereClause = "HLevel = " + hlevel;
             IFeatureCursor cursor = features.Update(filter, true);
@@ -135,8 +136,9 @@ namespace AEToolLib
 
                 for (int i = 0; i < pointCount; i++)
                 {
-                    IPoint targetPoint = geom.get_Point(i);
-                    setPointZ(fws, originFeature, targetPoint, hlevel, buffer);
+                    IPoint targetPoint = null;
+                    geom.QueryPoint(i, targetPoint);
+                    setPointZ(origin, targetPoint, hlevel, buffer);
                     geom.UpdatePoint(i, targetPoint);
                 }
                 polygon.Shape = (IGeometry)geom;
@@ -145,7 +147,7 @@ namespace AEToolLib
             }
         }
 
-    
+
 
         /// <summary>
         ///  赋值
@@ -155,12 +157,10 @@ namespace AEToolLib
         /// <param name="point">目标点</param>
         /// <param name="HLevel">HLevel</param>
         /// <param name="buffer">缓冲范围</param>
-        public void setPointZ(IFeatureWorkspace fws, String originFeature, IPoint targetPoint, String HLevel,double buffer)
+        public void setPointZ(IFeatureClass originFeature, IPoint targetPoint, String HLevel, double buffer)
         {
 
             //根据点坐标找到指定距离内的三维点云数据
-            IFeatureClass points = fws.OpenFeatureClass(originFeature);
-
             ISpatialFilter sf = new SpatialFilter();
             ITopologicalOperator topo = (ITopologicalOperator)targetPoint;
             IGeometry bufferPoint = topo.Buffer(buffer);//缓冲1米的距离
@@ -169,7 +169,7 @@ namespace AEToolLib
             sf.GeometryField = "shape";
             sf.SpatialRel = esriSpatialRelEnum.esriSpatialRelContains;
             sf.WhereClause = "HLevel = " + HLevel;
-            IFeatureCursor cursor = points.Search(sf, true);
+            IFeatureCursor cursor = originFeature.Search(sf, true);
             IFeature row = cursor.NextFeature();
             if (row != null)
             {
@@ -181,57 +181,101 @@ namespace AEToolLib
 
         }
 
-        public void JiebianProcess(ArrayList featureArray)
+        /// <summary>
+        /// 以基准要素为数据源，为目标要素赋值
+        /// </summary>
+        /// <param name="originFeature">基准要素</param>
+        /// <param name="featureArray">目标要素集</param>
+        public void JiebianProcess(String originFeature, ArrayList featureArray)
         {
             InitWorkspace();
-            if(featureArray == null || featureArray.Count == 0)
+            if (featureArray == null || featureArray.Count == 0)
             {
-                return ;
+                return;
             }
-            foreach (String featureName in featureArray) //循环接边
+            //接边流程
+
+            //1 取出基准要素
+            IFeatureClass featureClass = fws.OpenFeatureClass(originFeature);
+
+            //2 查询出所有的要素(可更新要素)
+            IFeatureCursor cursor = featureClass.Search(null, true);
+
+            //3 循环接边
+            //3.1 取出一个面
+            IFeature updateFeature = cursor.NextFeature();
+
+            while (updateFeature != null)
             {
-                //接边流程
-
-                //1 取出一个面
-                IFeatureClass featureClass = fws.OpenFeatureClass(featureName);
-
-                //2 查询出所有的要素(可更新要素)
-                IFeatureCursor updateCursor = featureClass.Update(null, true);
-
-                //3 循环接边
-                //3.1 取出一个面
-                IFeature updateFeature = updateCursor.NextFeature();
 
                 //3.2 取出这个面的所有点
                 Polygon updatePolygon = (Polygon)updateFeature.Shape;
                 int pointCount = updatePolygon.PointCount - 1; //多边形最后一个点与第一个点重复，不编辑
-
+                ESRI.ArcGIS.Geometry.Point point = new ESRI.ArcGIS.Geometry.Point();
                 for (int i = 0; i < pointCount; i++)
                 {
-                    ESRI.ArcGIS.Geometry.Point point = (Point)updatePolygon.get_Point(i);
+
+                    updatePolygon.QueryPoint(i, point);
+                    
 
                     //3.3 判断与点接触的面,条件这个面不是自己
                     ISpatialFilter spatiaFilter = new SpatialFilter();
                     spatiaFilter.GeometryField = "shape";
                     spatiaFilter.SpatialRel = esriSpatialRelEnum.esriSpatialRelTouches;
-                    spatiaFilter.Geometry = updatePolygon.get_Point(i);
-                    
+                    spatiaFilter.Geometry = point;
+
                     //3.4 根据条件循环查询
                     foreach (string otherFeatureName in featureArray)
                     {
-                        if (featureName.Equals(otherFeatureName))
+                        if (originFeature.Equals(otherFeatureName))
                         {
                             spatiaFilter.WhereClause = "OBJECTID <> " + updateFeature.OID;
                         }
 
                         IFeatureClass otherFeature = fws.OpenFeatureClass(otherFeatureName);
-                        IFeatureCursor cursor = otherFeature.Update(spatiaFilter,true);
-                        IFeature feature = cursor.NextFeature();// 查询到的接触点
-                        int id = feature.OID;
+                        IFeatureCursor updateCursor = otherFeature.Update(spatiaFilter, true);
+                        IFeature feature = updateCursor.NextFeature();// 查询到的接触面
+                        while (feature != null)
+                        {
+                            Polygon polygon = (Polygon)feature.Shape;
+                            //找到同名点 找到立即跳出
+                            int PPointCount = polygon.PointCount - 1;
+                            IPoint equalsPoint = new Point();
+                            for (int j = 0; j < PPointCount; j++)
+                            {
+                                polygon.QueryPoint(j, equalsPoint);
+                                if (IsEqualPoint(point, equalsPoint))
+                                {
+                                    equalsPoint.Z = point.Z;
+                                    polygon.UpdatePoint(j, equalsPoint);
+                                    break;
+                                }
+                            }
+                            feature = updateCursor.NextFeature();// 下一个接触面
+                        }
                     }
                 }
-
+                updateFeature = cursor.NextFeature();
             }
+        }
+
+        /// <summary>
+        /// 判断是否为同名点
+        /// </summary>
+        /// <param name="point"></param>
+        /// <param name="equalsPoint"></param>
+        /// <returns></returns>
+        private bool IsEqualPoint(IPoint point, IPoint equalsPoint)
+        {
+            if (point.Equals(equalsPoint))
+            {
+                return true;
+            }
+            else
+            {
+                return point.X == equalsPoint.X && point.Y == equalsPoint.Y;
+            }
+
         }
 
         public IWorkspace GetWorkspace()

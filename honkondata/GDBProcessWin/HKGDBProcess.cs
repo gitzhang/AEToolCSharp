@@ -19,7 +19,7 @@ namespace GDBProcessWin
 {
     public partial class HKDataProcessForm : Form
     {
-        public delegate void ReportProcessInfo(string info , int percent);//实现Background的ProcessChange事件
+        public delegate void ReportProcessInfo(string info, int percent);//实现Background的ProcessChange事件
         public delegate void DoneFeatureProcess(string info);//实现Background的RunWorkerCompleted事件
         public delegate void FeatureProcessDetail(string info); //实现要素处理的细节信息
 
@@ -40,6 +40,7 @@ namespace GDBProcessWin
         /// GDB数据库工具
         /// </summary>
         private GDBTools gdbTool;
+        private string originFeatureTxt;
 
         public HKDataProcessForm()
         {
@@ -65,27 +66,29 @@ namespace GDBProcessWin
             {
                 gdbFilePath = folder.SelectedPath;
                 gdbFileTxt.Text = gdbFilePath;
-                FillFeaturesToBox(targerFeatures);
+                FillFeaturesToBox(targerFeatures, originFeature);
             }
         }
 
         /// <summary>
         /// 填充要素到CheckedListBox
         /// </summary>
-        private void FillFeaturesToBox(CheckedListBox clb)
+        private void FillFeaturesToBox(CheckedListBox clb, ComboBox cbx)
         {
             ArrayList features = gdbTool.GetFeatures(gdbFilePath);
             if (features != null)
             {
                 clb.Items.Clear();
+                cbx.Items.Clear();
                 clb.Items.AddRange(features.ToArray());
+                cbx.Items.AddRange(features.ToArray());
                 processResult.Text = "";
             }
             else
             {
                 processResult.Text = "GDB数据库出错！请重新选择。";
             }
-            
+
         }
 
         /// <summary>
@@ -96,33 +99,39 @@ namespace GDBProcessWin
         private void startBtn_Click(object sender, EventArgs e)
         {
             startBtn.Enabled = false;
+            gdbFileTxt.Enabled = false;
+            targerFeatures.Enabled = false;
+            originFeature.Enabled = false;
+            HLevel.Enabled = false;
+            buffer.Enabled = false;
             Thread process = new Thread(new ThreadStart(this.threadProcess));
+            originFeatureTxt = originFeature.Text;
             process.Start();
         }
 
         private void threadProcess()
         {
             IEnumerator features = targerFeatures.CheckedItems.GetEnumerator();
-          //  gdbTool.UpdateFeatures(features, originFeature.Text, HLevel.Lines, Double.Parse(buffer.Text));
 
             ArrayList featureList = new ArrayList();
             while (features.MoveNext())
             {
                 featureList.Add((String)features.Current);
             }
-            
+
             int currFeature = 1;
 
             String[] HL = HLevel.Lines;
 
             int total = featureList.Count * HL.Length;
 
-            foreach(String featureName in featureList)
+            foreach (String featureName in featureList)
             {
                 for (int i = 0, length = HL.Length; i < length; i++)
                 {
-                    reportProcessInfo(String.Format("当前处理要素：{0} 。级别：{1}", featureName,HL[i]), GetPercent(currFeature, total));
-                    UpdateFeature(featureName, originFeature.Text, HL[i], Double.Parse(buffer.Text));
+                    reportProcessInfo(String.Format("当前处理要素：{0} 。级别：{1}", featureName, HL[i]), GetPercent(currFeature, total));
+                    UpdateFeature(featureName, originFeatureTxt, HL[i], Double.Parse(buffer.Text));
+
                     currFeature++;
                 }
             }
@@ -146,17 +155,17 @@ namespace GDBProcessWin
         /// <param name="info">信息</param>
         /// <param name="percent">进度</param>
         private void UpdatePercentInfo(string info, int percent)
-        { 
-            if(InvokeRequired)
+        {
+            if (InvokeRequired)
             {
-                Invoke(new ReportProcessInfo(UpdatePercentInfo),info,percent);
+                Invoke(new ReportProcessInfo(UpdatePercentInfo), info, percent);
             }
             else
             {
                 updateProcessPercent.Value = percent;
                 processResult.Text = info;
             }
-           
+
         }
 
         /// <summary>
@@ -173,6 +182,11 @@ namespace GDBProcessWin
             {
                 processResult.Text = info;
                 startBtn.Enabled = true;
+                gdbFileTxt.Enabled = true;
+                targerFeatures.Enabled = true;
+                originFeature.Enabled = true;
+                HLevel.Enabled = true;
+                buffer.Enabled = true;
             }
         }
 
@@ -183,7 +197,7 @@ namespace GDBProcessWin
         {
             if (InvokeRequired)
             {
-                Invoke(new FeatureProcessDetail(UpdateFeatureDetail),info);
+                Invoke(new FeatureProcessDetail(UpdateFeatureDetail), info);
             }
             else
             {
@@ -204,6 +218,7 @@ namespace GDBProcessWin
             gdbTool.InitWorkspace();
             IFeatureWorkspace fws = (IFeatureWorkspace)gdbTool.GetWorkspace();
             IFeatureClass features = fws.OpenFeatureClass(targetFeature);
+            IFeatureClass origin = fws.OpenFeatureClass(originFeature);
             IQueryFilter filter = new QueryFilter();
             filter.WhereClause = "HLevel = " + hlevel;
             ICursor countCorsor = (ICursor)features.Search(filter, true);
@@ -218,17 +233,18 @@ namespace GDBProcessWin
             IFeature polygon = cursor.NextFeature();
             while (polygon != null)
             {
-                UpdateFeatureDetail(String.Format("当前要素处理进度{0}/{1}",num,totalCount));
+                UpdateFeatureDetail(String.Format("当前要素处理进度{0}/{1}", num, totalCount));
                 num++;
                 //得到几何对象
                 Polygon geom = (Polygon)polygon.Shape;
                 // 多边形顶点要素数   最后一个点与第一个点重复所以不编辑
                 int pointCount = geom.PointCount - 1;
 
+                IPoint targetPoint = new ESRI.ArcGIS.Geometry.Point();
                 for (int i = 0; i < pointCount; i++)
                 {
-                    IPoint targetPoint = geom.get_Point(i);
-                    gdbTool.setPointZ(fws, originFeature, targetPoint, hlevel, buffer);
+                    geom.QueryPoint(i, targetPoint);
+                    gdbTool.setPointZ(origin, targetPoint, hlevel, buffer);
                     geom.UpdatePoint(i, targetPoint);
                 }
                 polygon.Shape = (IGeometry)geom;
@@ -237,7 +253,7 @@ namespace GDBProcessWin
             }
         }
 
-
+        ///
         private void RSFilePath_MouseClick(object sender, MouseEventArgs e)
         {
             FolderBrowserDialog folder = new FolderBrowserDialog();
@@ -246,7 +262,7 @@ namespace GDBProcessWin
             {
                 gdbFilePath = folder.SelectedPath;
                 RSFilePath.Text = gdbFilePath;
-                FillFeaturesToBox(RSFeatures);
+                FillFeaturesToBox(RSFeatures, originFeatureCBX);
             }
         }
 
@@ -255,9 +271,9 @@ namespace GDBProcessWin
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void button1_Click(object sender, EventArgs e)
+        private void JieBianBtn_Click(object sender, EventArgs e)
         {
-            button1.Enabled = false;
+            JieBianBtn.Enabled = false;
             Thread process = new Thread(new ThreadStart(this.RoadCheckProcessStart));
             process.Start();
         }
@@ -282,8 +298,10 @@ namespace GDBProcessWin
             else
             {
                 IEnumerator erator = RSFeatures.CheckedItems.GetEnumerator();
-                ArrayList featureArray = Utils.ConvertEnumerlatorToArrayList(erator); //需要接边的图层名称列表
-                gdbTool.JiebianProcess(featureArray);
+                string originFeature = originFeatureCBX.Text; //基础要素
+                ArrayList featureArray = Utils.ConvertEnumerlatorToArrayList(erator); //目标要素
+                gdbTool.JiebianProcess(originFeature, featureArray);
+                JieBianBtn.Enabled = true;
             }
 
         }

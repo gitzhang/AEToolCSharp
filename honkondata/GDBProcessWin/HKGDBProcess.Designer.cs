@@ -34,7 +34,6 @@
             this.targerFeatures = new System.Windows.Forms.CheckedListBox();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
-            this.originFeature = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
             this.startBtn = new System.Windows.Forms.Button();
             this.label5 = new System.Windows.Forms.Label();
@@ -46,8 +45,11 @@
             this.details = new System.Windows.Forms.Label();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.originFeature = new System.Windows.Forms.ComboBox();
             this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.button1 = new System.Windows.Forms.Button();
+            this.originFeatureCBX = new System.Windows.Forms.ComboBox();
+            this.label9 = new System.Windows.Forms.Label();
+            this.JieBianBtn = new System.Windows.Forms.Button();
             this.label7 = new System.Windows.Forms.Label();
             this.RSFilePath = new System.Windows.Forms.TextBox();
             this.label8 = new System.Windows.Forms.Label();
@@ -77,7 +79,7 @@
             // targerFeatures
             // 
             this.targerFeatures.FormattingEnabled = true;
-            this.targerFeatures.Location = new System.Drawing.Point(12, 84);
+            this.targerFeatures.Location = new System.Drawing.Point(12, 132);
             this.targerFeatures.Name = "targerFeatures";
             this.targerFeatures.Size = new System.Drawing.Size(498, 148);
             this.targerFeatures.TabIndex = 2;
@@ -86,28 +88,21 @@
             // 
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("微软雅黑", 12F);
-            this.label2.Location = new System.Drawing.Point(8, 60);
+            this.label2.Location = new System.Drawing.Point(8, 108);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(122, 21);
+            this.label2.Size = new System.Drawing.Size(90, 21);
             this.label2.TabIndex = 3;
-            this.label2.Text = "选择转换目标：";
+            this.label2.Text = "赋值目标：";
             // 
             // label3
             // 
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("微软雅黑", 12F);
-            this.label3.Location = new System.Drawing.Point(8, 235);
+            this.label3.Location = new System.Drawing.Point(8, 60);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(74, 21);
+            this.label3.Size = new System.Drawing.Size(138, 21);
             this.label3.TabIndex = 4;
-            this.label3.Text = "数据源：";
-            // 
-            // originFeature
-            // 
-            this.originFeature.Location = new System.Drawing.Point(12, 259);
-            this.originFeature.Name = "originFeature";
-            this.originFeature.Size = new System.Drawing.Size(498, 21);
-            this.originFeature.TabIndex = 5;
+            this.label3.Text = "三维点云数据源：";
             // 
             // label4
             // 
@@ -116,9 +111,9 @@
             this.label4.Font = new System.Drawing.Font("微软雅黑", 12F);
             this.label4.Location = new System.Drawing.Point(8, 11);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(140, 21);
+            this.label4.Size = new System.Drawing.Size(108, 21);
             this.label4.TabIndex = 6;
-            this.label4.Text = "GDB数据库位置：";
+            this.label4.Text = "GDB数据库：";
             // 
             // startBtn
             // 
@@ -176,7 +171,7 @@
             // 
             // updateProcessPercent
             // 
-            this.updateProcessPercent.Location = new System.Drawing.Point(12, 423);
+            this.updateProcessPercent.Location = new System.Drawing.Point(12, 428);
             this.updateProcessPercent.Name = "updateProcessPercent";
             this.updateProcessPercent.Size = new System.Drawing.Size(498, 23);
             this.updateProcessPercent.TabIndex = 13;
@@ -202,6 +197,7 @@
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.originFeature);
             this.tabPage1.Controls.Add(this.label4);
             this.tabPage1.Controls.Add(this.processResult);
             this.tabPage1.Controls.Add(this.details);
@@ -213,7 +209,6 @@
             this.tabPage1.Controls.Add(this.buffer);
             this.tabPage1.Controls.Add(this.label3);
             this.tabPage1.Controls.Add(this.label6);
-            this.tabPage1.Controls.Add(this.originFeature);
             this.tabPage1.Controls.Add(this.HLevel);
             this.tabPage1.Controls.Add(this.label5);
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
@@ -225,9 +220,19 @@
             this.tabPage1.Text = "道路赋值";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
+            // originFeature
+            // 
+            this.originFeature.FormattingEnabled = true;
+            this.originFeature.Location = new System.Drawing.Point(12, 85);
+            this.originFeature.Name = "originFeature";
+            this.originFeature.Size = new System.Drawing.Size(498, 20);
+            this.originFeature.TabIndex = 15;
+            // 
             // tabPage2
             // 
-            this.tabPage2.Controls.Add(this.button1);
+            this.tabPage2.Controls.Add(this.originFeatureCBX);
+            this.tabPage2.Controls.Add(this.label9);
+            this.tabPage2.Controls.Add(this.JieBianBtn);
             this.tabPage2.Controls.Add(this.label7);
             this.tabPage2.Controls.Add(this.RSFilePath);
             this.tabPage2.Controls.Add(this.label8);
@@ -240,15 +245,33 @@
             this.tabPage2.Text = "接边处理";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
-            // button1
+            // originFeatureCBX
             // 
-            this.button1.Location = new System.Drawing.Point(438, 523);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 11;
-            this.button1.Text = "开始";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.originFeatureCBX.FormattingEnabled = true;
+            this.originFeatureCBX.Location = new System.Drawing.Point(12, 85);
+            this.originFeatureCBX.Name = "originFeatureCBX";
+            this.originFeatureCBX.Size = new System.Drawing.Size(498, 20);
+            this.originFeatureCBX.TabIndex = 13;
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Font = new System.Drawing.Font("微软雅黑", 12F);
+            this.label9.Location = new System.Drawing.Point(8, 60);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(90, 21);
+            this.label9.TabIndex = 12;
+            this.label9.Text = "基准要素：";
+            // 
+            // JieBianBtn
+            // 
+            this.JieBianBtn.Location = new System.Drawing.Point(438, 523);
+            this.JieBianBtn.Name = "JieBianBtn";
+            this.JieBianBtn.Size = new System.Drawing.Size(75, 23);
+            this.JieBianBtn.TabIndex = 11;
+            this.JieBianBtn.Text = "开始";
+            this.JieBianBtn.UseVisualStyleBackColor = true;
+            this.JieBianBtn.Click += new System.EventHandler(this.JieBianBtn_Click);
             // 
             // label7
             // 
@@ -257,9 +280,9 @@
             this.label7.Font = new System.Drawing.Font("微软雅黑", 12F);
             this.label7.Location = new System.Drawing.Point(8, 11);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(140, 21);
+            this.label7.Size = new System.Drawing.Size(108, 21);
             this.label7.TabIndex = 10;
-            this.label7.Text = "GDB数据库位置：";
+            this.label7.Text = "GDB数据库：";
             // 
             // RSFilePath
             // 
@@ -273,16 +296,16 @@
             // 
             this.label8.AutoSize = true;
             this.label8.Font = new System.Drawing.Font("微软雅黑", 12F);
-            this.label8.Location = new System.Drawing.Point(8, 60);
+            this.label8.Location = new System.Drawing.Point(8, 108);
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(122, 21);
+            this.label8.Size = new System.Drawing.Size(90, 21);
             this.label8.TabIndex = 9;
-            this.label8.Text = "选择转换目标：";
+            this.label8.Text = "接边目标：";
             // 
             // RSFeatures
             // 
             this.RSFeatures.FormattingEnabled = true;
-            this.RSFeatures.Location = new System.Drawing.Point(12, 84);
+            this.RSFeatures.Location = new System.Drawing.Point(12, 132);
             this.RSFeatures.Name = "RSFeatures";
             this.RSFeatures.Size = new System.Drawing.Size(498, 148);
             this.RSFeatures.TabIndex = 8;
@@ -315,7 +338,6 @@
         private System.Windows.Forms.CheckedListBox targerFeatures;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.TextBox originFeature;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Button startBtn;
         private System.Windows.Forms.Label label5;
@@ -332,7 +354,10 @@
         private System.Windows.Forms.TextBox RSFilePath;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.CheckedListBox RSFeatures;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button JieBianBtn;
+        private System.Windows.Forms.ComboBox originFeature;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.ComboBox originFeatureCBX;
     }
 }
 
