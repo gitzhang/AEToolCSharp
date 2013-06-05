@@ -274,6 +274,7 @@ namespace GDBProcessWin
         private void JieBianBtn_Click(object sender, EventArgs e)
         {
             JieBianBtn.Enabled = false;
+            ProcessInfo.Text = "开始处理...";
             Thread process = new Thread(new ThreadStart(this.RoadCheckProcessStart));
             process.Start();
         }
@@ -300,8 +301,10 @@ namespace GDBProcessWin
                 IEnumerator erator = RSFeatures.CheckedItems.GetEnumerator();
                 string originFeature = originFeatureCBX.Text; //基础要素
                 ArrayList featureArray = Utils.ConvertEnumerlatorToArrayList(erator); //目标要素
+                ProcessInfo.Text = "处理中...";
                 gdbTool.JiebianProcess(originFeature, featureArray);
                 JieBianBtn.Enabled = true;
+                ProcessInfo.Text = "完成!";
             }
 
         }

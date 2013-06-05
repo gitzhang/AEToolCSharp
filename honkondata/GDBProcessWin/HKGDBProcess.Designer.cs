@@ -54,6 +54,7 @@
             this.RSFilePath = new System.Windows.Forms.TextBox();
             this.label8 = new System.Windows.Forms.Label();
             this.RSFeatures = new System.Windows.Forms.CheckedListBox();
+            this.ProcessInfo = new System.Windows.Forms.Label();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
@@ -230,6 +231,7 @@
             // 
             // tabPage2
             // 
+            this.tabPage2.Controls.Add(this.ProcessInfo);
             this.tabPage2.Controls.Add(this.originFeatureCBX);
             this.tabPage2.Controls.Add(this.label9);
             this.tabPage2.Controls.Add(this.JieBianBtn);
@@ -310,6 +312,15 @@
             this.RSFeatures.Size = new System.Drawing.Size(498, 148);
             this.RSFeatures.TabIndex = 8;
             // 
+            // ProcessInfo
+            // 
+            this.ProcessInfo.AutoSize = true;
+            this.ProcessInfo.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.ProcessInfo.Location = new System.Drawing.Point(12, 358);
+            this.ProcessInfo.Name = "ProcessInfo";
+            this.ProcessInfo.Size = new System.Drawing.Size(0, 16);
+            this.ProcessInfo.TabIndex = 14;
+            // 
             // HKDataProcessForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -358,6 +369,7 @@
         private System.Windows.Forms.ComboBox originFeature;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.ComboBox originFeatureCBX;
+        private System.Windows.Forms.Label ProcessInfo;
     }
 }
 
