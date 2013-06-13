@@ -41,6 +41,7 @@ namespace GDBProcessWin
         /// </summary>
         private GDBTools gdbTool;
         private string originFeatureTxt;
+        private string PT;
 
         public HKDataProcessForm()
         {
@@ -104,8 +105,10 @@ namespace GDBProcessWin
             originFeature.Enabled = false;
             HLevel.Enabled = false;
             buffer.Enabled = false;
+            PointTypeCBX.Enabled = false;
             Thread process = new Thread(new ThreadStart(this.threadProcess));
             originFeatureTxt = originFeature.Text;
+            PT = PointTypeCBX.Text;
             process.Start();
         }
 
@@ -122,15 +125,16 @@ namespace GDBProcessWin
             int currFeature = 1;
 
             String[] HL = HLevel.Lines;
-
+            
             int total = featureList.Count * HL.Length;
+
 
             foreach (String featureName in featureList)
             {
                 for (int i = 0, length = HL.Length; i < length; i++)
                 {
                     reportProcessInfo(String.Format("当前处理要素：{0} 。级别：{1}", featureName, HL[i]), GetPercent(currFeature, total));
-                    UpdateFeature(featureName, originFeatureTxt, HL[i], Double.Parse(buffer.Text));
+                    UpdateFeature(featureName, originFeatureTxt , PT , HL[i], Double.Parse(buffer.Text));
 
                     currFeature++;
                 }
@@ -187,6 +191,7 @@ namespace GDBProcessWin
                 originFeature.Enabled = true;
                 HLevel.Enabled = true;
                 buffer.Enabled = true;
+                PointTypeCBX.Enabled = true;
             }
         }
 
@@ -213,7 +218,7 @@ namespace GDBProcessWin
         /// <param name="originFeature">源要素</param>
         /// <param name="hlevel">h级别</param>
         /// <param name="buffer">缓冲区范围</param>
-        public void UpdateFeature(String targetFeature, String originFeature, String hlevel, double buffer)
+        public void UpdateFeature(String targetFeature, String originFeature, String PT, String hlevel, double buffer)
         {
             gdbTool.InitWorkspace();
             IFeatureWorkspace fws = (IFeatureWorkspace)gdbTool.GetWorkspace();
@@ -244,7 +249,7 @@ namespace GDBProcessWin
                 for (int i = 0; i < pointCount; i++)
                 {
                     geom.QueryPoint(i, targetPoint);
-                    gdbTool.setPointZ(origin, targetPoint, hlevel, buffer);
+                    gdbTool.setPointZ(origin,PT, targetPoint, hlevel, buffer);
                     geom.UpdatePoint(i, targetPoint);
                 }
                 polygon.Shape = (IGeometry)geom;

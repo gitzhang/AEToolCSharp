@@ -45,8 +45,10 @@
             this.details = new System.Windows.Forms.Label();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.PointTypeCBX = new System.Windows.Forms.ComboBox();
             this.originFeature = new System.Windows.Forms.ComboBox();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.ProcessInfo = new System.Windows.Forms.Label();
             this.originFeatureCBX = new System.Windows.Forms.ComboBox();
             this.label9 = new System.Windows.Forms.Label();
             this.JieBianBtn = new System.Windows.Forms.Button();
@@ -54,7 +56,6 @@
             this.RSFilePath = new System.Windows.Forms.TextBox();
             this.label8 = new System.Windows.Forms.Label();
             this.RSFeatures = new System.Windows.Forms.CheckedListBox();
-            this.ProcessInfo = new System.Windows.Forms.Label();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
@@ -101,9 +102,9 @@
             this.label3.Font = new System.Drawing.Font("微软雅黑", 12F);
             this.label3.Location = new System.Drawing.Point(8, 60);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(138, 21);
+            this.label3.Size = new System.Drawing.Size(186, 21);
             this.label3.TabIndex = 4;
-            this.label3.Text = "三维点云数据源：";
+            this.label3.Text = "三维点云数据源及类型：";
             // 
             // label4
             // 
@@ -198,6 +199,7 @@
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.PointTypeCBX);
             this.tabPage1.Controls.Add(this.originFeature);
             this.tabPage1.Controls.Add(this.label4);
             this.tabPage1.Controls.Add(this.processResult);
@@ -221,12 +223,24 @@
             this.tabPage1.Text = "道路赋值";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
+            // PointTypeCBX
+            // 
+            this.PointTypeCBX.FormattingEnabled = true;
+            this.PointTypeCBX.Items.AddRange(new object[] {
+            "Point ZM",
+            "Multipoint ZM"});
+            this.PointTypeCBX.Location = new System.Drawing.Point(389, 85);
+            this.PointTypeCBX.Name = "PointTypeCBX";
+            this.PointTypeCBX.Size = new System.Drawing.Size(121, 20);
+            this.PointTypeCBX.TabIndex = 16;
+            this.PointTypeCBX.Text = "Point ZM";
+            // 
             // originFeature
             // 
             this.originFeature.FormattingEnabled = true;
             this.originFeature.Location = new System.Drawing.Point(12, 85);
             this.originFeature.Name = "originFeature";
-            this.originFeature.Size = new System.Drawing.Size(498, 20);
+            this.originFeature.Size = new System.Drawing.Size(371, 20);
             this.originFeature.TabIndex = 15;
             // 
             // tabPage2
@@ -246,6 +260,15 @@
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "接边处理";
             this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // ProcessInfo
+            // 
+            this.ProcessInfo.AutoSize = true;
+            this.ProcessInfo.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.ProcessInfo.Location = new System.Drawing.Point(12, 358);
+            this.ProcessInfo.Name = "ProcessInfo";
+            this.ProcessInfo.Size = new System.Drawing.Size(0, 16);
+            this.ProcessInfo.TabIndex = 14;
             // 
             // originFeatureCBX
             // 
@@ -312,15 +335,6 @@
             this.RSFeatures.Size = new System.Drawing.Size(498, 148);
             this.RSFeatures.TabIndex = 8;
             // 
-            // ProcessInfo
-            // 
-            this.ProcessInfo.AutoSize = true;
-            this.ProcessInfo.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.ProcessInfo.Location = new System.Drawing.Point(12, 358);
-            this.ProcessInfo.Name = "ProcessInfo";
-            this.ProcessInfo.Size = new System.Drawing.Size(0, 16);
-            this.ProcessInfo.TabIndex = 14;
-            // 
             // HKDataProcessForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -370,6 +384,7 @@
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.ComboBox originFeatureCBX;
         private System.Windows.Forms.Label ProcessInfo;
+        private System.Windows.Forms.ComboBox PointTypeCBX;
     }
 }
 

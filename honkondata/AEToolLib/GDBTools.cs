@@ -22,6 +22,9 @@ namespace AEToolLib
 
         private int hWnd = 0;
 
+        public const String MULTIPOINT = "Multipoint ZM";
+        public const String POINT = "Point ZM";
+
         /// <summary>
         /// 获取工作空间工厂
         /// </summary>
@@ -96,14 +99,14 @@ namespace AEToolLib
         /// <param name="originFeature"></param>
         /// <param name="HLevel"></param>
         /// <param name="buffer"></param>
-        public void UpdateFeatures(IEnumerator targetFeatures, String originFeature, String[] HLevel, double buffer)
+        public void UpdateFeatures(IEnumerator targetFeatures, String originFeature, String PT, String[] HLevel, double buffer)
         {
             while (targetFeatures.MoveNext())
             {
                 String featureName = (String)targetFeatures.Current;
                 for (int i = 0, length = HLevel.Length; i < length; i++)
                 {
-                    UpdateFeature(featureName, originFeature, HLevel[i], buffer, null);
+                    UpdateFeature(featureName, originFeature, PT, HLevel[i], buffer, null);
                 }
             }
         }
@@ -116,7 +119,7 @@ namespace AEToolLib
         /// <param name="originFeature">源要素</param>
         /// <param name="hlevel">h级别</param>
         /// <param name="buffer">缓冲区范围</param>
-        public void UpdateFeature(String targetFeature, String originFeature, String hlevel, double buffer, Delegate delegateMethod)
+        public void UpdateFeature(String targetFeature, String originFeature, String PT, String hlevel, double buffer, Delegate delegateMethod)
         {
             InitWorkspace();
             IFeatureWorkspace fws = (IFeatureWorkspace)ws;
@@ -138,7 +141,7 @@ namespace AEToolLib
                 {
                     IPoint targetPoint = null;
                     geom.QueryPoint(i, targetPoint);
-                    setPointZ(origin, targetPoint, hlevel, buffer);
+                    setPointZ(origin, PT, targetPoint, hlevel, buffer);
                     geom.UpdatePoint(i, targetPoint);
                 }
                 polygon.Shape = (IGeometry)geom;
@@ -157,13 +160,13 @@ namespace AEToolLib
         /// <param name="point">目标点</param>
         /// <param name="HLevel">HLevel</param>
         /// <param name="buffer">缓冲范围</param>
-        public void setPointZ(IFeatureClass originFeature, IPoint targetPoint, String HLevel, double buffer)
+        public void setPointZ(IFeatureClass originFeature, String PT, IPoint targetPoint, String HLevel, double buffer)
         {
 
             //根据点坐标找到指定距离内的三维点云数据
             ISpatialFilter sf = new SpatialFilter();
             ITopologicalOperator topo = (ITopologicalOperator)targetPoint;
-            IGeometry bufferPoint = topo.Buffer(buffer);//缓冲1米的距离
+            IGeometry bufferPoint = topo.Buffer(buffer);//缓冲距离
 
             sf.Geometry = bufferPoint;
             sf.GeometryField = "shape";
@@ -173,9 +176,22 @@ namespace AEToolLib
             IFeature row = cursor.NextFeature();
             if (row != null)
             {
-                IMultipoint closePoint = (IMultipoint)row.Shape;
-                IGeometryCollection gc = (IGeometryCollection)closePoint;
-                IPoint point = (IPoint)gc.get_Geometry(0);
+                IPoint point = null;
+                if (MULTIPOINT.Equals(PT))
+                {
+                    IMultipoint closePoint = (IMultipoint)row.Shape;
+                    IGeometryCollection gc = (IGeometryCollection)closePoint;
+                    point = (IPoint)gc.get_Geometry(0);
+                }
+                else if (POINT.Equals(PT))
+                {
+                    point = (IPoint)row.Shape;
+                }
+                else
+                {
+                    return;
+                }
+                double z = Math.Round(point.Z, 2);
                 targetPoint.Z = point.Z;
             }
 
@@ -216,7 +232,7 @@ namespace AEToolLib
                 {
 
                     updatePolygon.QueryPoint(i, point);
-                    
+
 
                     //3.3 判断与点接触的面,条件这个面不是自己
                     ISpatialFilter spatiaFilter = new SpatialFilter();
@@ -273,7 +289,7 @@ namespace AEToolLib
             }
             else
             {
-                return point.X == equalsPoint.X && point.Y == equalsPoint.Y;
+                return Math.Round(point.X, 3) == Math.Round(equalsPoint.X, 3) && Math.Round(point.Y, 3) == Math.Round(equalsPoint.Y, 3);
             }
 
         }
